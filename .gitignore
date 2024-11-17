@@ -1,0 +1,35 @@
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Flask-specific
+instance/
+*.log
+
+# Virtual environment
+virt/
+.env/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Machine learning artifacts
+# *.h5        # Keras models
+# *.pkl       # Pickled models
+# *.joblib    # Joblib models
+model/
+
+# Data files
+# *.csv
+*.tsv
+*.json
+*.xlsx
+
+# IDE/editor specific
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
