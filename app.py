@@ -7,7 +7,6 @@ from flask import session
 from flask import jsonify
 from flask import abort
 from flask_mysqldb import MySQL
-
 import string
 import pandas as pd
 import numpy as np
@@ -19,14 +18,7 @@ import torch
 tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-medium")
 model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-medium")
 
-
-
 app = Flask(__name__)
-
-
-
-
-
 
 loaded_modelRFC = pickle.load(open('modelRFC.pkl', 'rb'))
 loaded_modelNB = pickle.load(open('modelNB.pkl', 'rb'))
@@ -65,7 +57,6 @@ def server_error(e):
     return "server error"
 
 # FEEDBACK ROUTING AND CONTROLLER.//////////////////////////////////
-
 @app.route('/feedback')
 def feedback():
     return render_template("startingtemplates/feedback.html")
@@ -131,11 +122,6 @@ def update_controller():
         mysql.connection.commit()
         return redirect(url_for('admin_crops'))
 
-
-
-
-
-
 @app.route('/admin/crops/delete/<string:id>', methods = ['GET'])
 def delete(id):
     cur = mysql.connection.cursor()
@@ -144,14 +130,6 @@ def delete(id):
     mysql.connection.commit()
     print("data deleted in console")
     return redirect(url_for('admin_crops'))
-
-
-
-
-
-
-
-
 
 # AUTNENTICATION ROUTES/////////////////////////////////
 
@@ -215,13 +193,9 @@ def register_controller():
 
         session['email'] = record[3]
         return render_template("admintemplates/dashboard.html")
-    
 
 
 ###### STARTING TEMPLATE ROUTINGS ########
-
-
-
 @app.route("/chat")
 def chat_route():
     return render_template("startingtemplates/chat.html")
@@ -261,10 +235,6 @@ def testing():
 def contact():
     return render_template("startingtemplates/contact.html")
 
-
-
-
-# PREDICTION ROUTES/////////////////////////////////
 # predict and /predict1 (2 wata routes)
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -428,11 +398,7 @@ def predict1():
         accuracy_valueDT = accuracy_valueDT*100,
         accuracy_valueRFC = accuracy_valueRFC*100,
     )
-
-
-
 # ADMIN ROUTES/////////////////////////////////
-
 @app.route('/dashboard')
 def dashboard():
     if 'email' in session:
@@ -454,8 +420,6 @@ def admin_testinomials():
         return render_template("admintemplates/testinomials.html")
     else:
         return render_template('authtemplates/login.html', message = loginWarning)
-    
-
 
 @app.route('/admin/feedback')
 def admin_feedback():
@@ -468,7 +432,6 @@ def admin_feedback():
     else:
         return render_template('authtemplates/login.html', message = loginWarning)
 
-
 @app.route('/admin/crops')
 def admin_crops():
     myCursor = mysql.connection.cursor()
@@ -480,8 +443,6 @@ def admin_crops():
         return render_template('/admintemplates/crops.html', data = data)
     else:
         return render_template('authtemplates/login.html', message = loginWarning)
-
-
 
 @app.route("/admin/addcrops")
 def addcrops():
@@ -509,11 +470,7 @@ def create():
         myCursor.close()
         return redirect(url_for('admin_crops'))
 
-
-
-
-# CHATTING ROUTES///////////////////////////
-
+# CHATTING ROUTES
 @app.route("/get", methods = ["GET", "POST"])
 def chat():
     input1 = request.form["msg"]
@@ -531,30 +488,11 @@ def chat():
     return get_Chat_response(input4)
 
 def get_Chat_response(text):
-    # IndentationError: expected an indented block after 'for' statement on line 468
     for step in range(5):
         new_user_input_ids = tokenizer.encode(str(text) + tokenizer.eos_token, return_tensors='pt')
         bot_input_ids = torch.cat([chat_history_ids, new_user_input_ids], dim=-1) if step > 0 else new_user_input_ids
         chat_history_ids = model.generate(bot_input_ids, max_length=1000, pad_token_id=tokenizer.eos_token_id)
-        # return tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
-         
-        if(text=="hello" or text=="hy" or text=="hey"):
-            varResponse = "Hello Please, How may I help you !"
-        elif(text=="accuracy" or text=="whatisaccuracy"):
-            varResponse = "In a crop recommendation system, accuracy refers to the measure of how accurately the system predicts or recommends the appropriate crops for a given set of conditions or parameters. It is a performance metric that evaluates the correctness of the system's recommendations."
-        elif(text=="cms" or text=="whatiscroprecommendationsystem" or text=="croprecommendationsystem" or text=="croprecommendation"):
-            varResponse = "Answer of Crop recommendation system"
-        elif(text=="whatiscrop" or text=="crop"):
-            varResponse = "A crop recommendation system is an application of data-driven techniques and algorithms that help farmers to make informed decisions about which crops to plant or cultivate in a given area."
-        elif(text=="rice" or text=="what is rice"):
-            varResponse = "Rice is a staple food for most of the world's population. Whole grain, rice has more nutrients and health benefits than white rice."
-        else:
-            varResponse = "Sorry, I cant understand,\n Please ask project related queries.\nThank you"
-        return varResponse
-    
-
-
-
+        return tokenizer.decode(chat_history_ids[:, bot_input_ids.shape[-1]:][0], skip_special_tokens=True)
 
 if __name__ == '__main__':
     app.run(debug=True, port="8000")
